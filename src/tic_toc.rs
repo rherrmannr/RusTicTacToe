@@ -27,10 +27,11 @@ mod tests {
 
     #[test]
     fn print_signs() {
+        assert_eq!("-", format!("{}", player::Sign::None));
         assert_eq!("X", format!("{}", player::Sign::X));
         assert_eq!("O", format!("{}", player::Sign::O));
-        assert_eq!("-", format!("{}", player::Sign::None));
     }
+
 }
 pub mod player {
 
