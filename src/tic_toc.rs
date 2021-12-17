@@ -26,6 +26,11 @@ mod tests {
     }
 
     #[test]
+    fn fail() {
+        assert_eq!(true, false);
+    }
+
+    #[test]
     fn print_signs() {
         assert_eq!("X", format!("{}", player::Sign::X));
         assert_eq!("O", format!("{}", player::Sign::O));
