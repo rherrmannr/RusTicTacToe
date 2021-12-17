@@ -15,7 +15,6 @@ mod tests {
 
         assert_eq!(player::Sign::X, *player1.sign());
         assert_eq!(player::Sign::O, *player2.sign());
-        assert_eq!(true, false);
     }
 
     #[test]
