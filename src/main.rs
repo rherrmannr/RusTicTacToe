@@ -1,30 +1,7 @@
-
 mod tic_toc;
-use tic_toc::{player, game_field};
+use tic_toc::{game_field, player};
+mod ui;
 
-mod ui {
-    use super::*;
-    use std::io;
-    pub fn display(game: &game_field::GameField) {
-        for row in game.get_field() {
-            for col in row {
-                print!("{}", col);
-            }
-            println!();
-        }
-    }
-
-    pub fn read_input() -> u8 {
-        loop {
-            let mut input = String::new();
-            io::stdin().read_line(&mut input).expect("Failed");
-            return match input.trim().parse() {
-                Ok(num) => num,
-                Err(_) => {println! ("Type in a number"); continue},
-            };
-        }
-    }
-}
 
 fn main() {
     let player1 = player::Player::new(1).expect("Failed to create Player");

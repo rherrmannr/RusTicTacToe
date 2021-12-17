@@ -9,7 +9,7 @@ mod tests {
 
         assert!(!player1.is_err());
         assert!(!player2.is_err());
-        
+
         let player1 = player1.expect("Not failed");
         let player2 = player2.expect("Not failed");
 
@@ -31,7 +31,6 @@ mod tests {
         assert_eq!("O", format!("{}", player::Sign::O));
         assert_eq!("-", format!("{}", player::Sign::None));
     }
-
 }
 pub mod player {
 
