@@ -31,6 +31,16 @@ mod tests {
         assert_eq!("O", format!("{}", player::Sign::O));
         assert_eq!("-", format!("{}", player::Sign::None));
     }
+
+    #[test]
+    fn activate_deactivate() {
+        let mut player = player::Player::new(1).expect("Error creating player");
+        assert!(!player.is_active());
+        player.activate();
+        assert!(player.is_active());
+        player.deactivate();
+        assert!(!player.is_active());
+    }
 }
 pub mod player {
 
@@ -57,6 +67,7 @@ pub mod player {
     pub struct Player {
         number: u8,
         sign: Sign,
+        active: bool,
     }
     impl Player {
         pub fn new(number: u8) -> Result<Self, ()> {
@@ -64,16 +75,30 @@ pub mod player {
                 1 => Ok(Player {
                     number,
                     sign: Sign::X,
+                    active: false,
                 }),
                 2 => Ok(Player {
                     number,
                     sign: Sign::O,
+                    active: false,
                 }),
                 _ => Err(()),
             }
         }
+
         pub fn sign(&self) -> &Sign {
             &self.sign
+        }
+
+        pub fn is_active(&self) -> bool {
+            self.active
+        }
+        pub fn activate(&mut self) {
+            self.active = true;
+        }
+
+        pub fn deactivate(&mut self) {
+            self.active = false;
         }
     }
 }
@@ -82,24 +107,22 @@ pub mod game_field {
     use super::player;
     pub type Field = Vec<Vec<player::Sign>>;
 
-    pub struct GameField<'a> {
+    pub struct GameField {
         field: Field,
-        player: &'a [player::Player; 2],
-        active_player: &'a player::Player,
+        player: [player::Player; 2],
     }
 
-    impl GameField<'_> {
-        pub fn new(size: usize, player: &[player::Player; 2]) -> GameField {
+    impl GameField {
+        pub fn new(size: usize, player: [player::Player; 2]) -> GameField {
             GameField {
                 field: vec![vec![player::Sign::None; size]; size],
                 player: player,
-                active_player: &player[1],
             }
         }
 
         pub fn set_sign(&mut self, row: usize, col: usize) {
             if self.field[row][col] == player::Sign::None {
-                self.field[row][col] = *self.active_player.sign();
+                self.field[row][col] = *self.active_player().sign();
                 GameField::swap_player(self);
             }
         }
@@ -109,11 +132,40 @@ pub mod game_field {
         }
 
         pub fn swap_player(&mut self) {
-            if *self.active_player == self.player[0] {
-                self.active_player = &self.player[1];
+            if *self.active_player() == self.player[0] {
+                self.player[0].deactivate();
+                self.player[1].activate();
             } else {
-                self.active_player = &self.player[0];
+                self.player[0].activate();
+                self.player[1].deactivate();
             }
         }
+
+        pub fn active_player(&self) -> &player::Player {
+            if self.player[1].is_active() {
+                return &self.player[1];
+            }
+            return &self.player[0];
+        }
+    }
+}
+
+pub mod game {
+    use super::game_field;
+    use super::player;
+    pub struct Game {
+        gamefield: game_field::GameField,
+    }
+    impl Game {
+        pub fn new(&mut self) {
+            let mut players = [
+                player::Player::new(1).expect("No error"),
+                player::Player::new(2).expect("No error"),
+            ];
+            players[0].activate();
+            self.gamefield = game_field::GameField::new(3, players);
+        }
+
+        pub fn start(&mut self) {}
     }
 }
