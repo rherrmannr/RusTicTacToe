@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod player_tests {
     use super::player;
 
     #[test]
@@ -63,7 +63,7 @@ pub mod player {
         }
     }
 
-    #[derive(PartialEq, Debug)]
+    #[derive(PartialEq, Debug, Copy, Clone)]
     pub struct Player {
         number: u8,
         sign: Sign,
@@ -103,6 +103,192 @@ pub mod player {
     }
 }
 
+#[cfg(test)]
+mod game_field_tests {
+    use super::*;
+
+    #[test]
+    fn create_empty_game_field() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let field = game_field::GameField::new(3, players);
+
+        assert_eq!(field.active_player().sign(), players[0].sign());
+        assert_ne!(field.active_player().sign(), players[1].sign());
+        assert_eq!(false, field.check_field());
+
+        assert_eq!(vec![vec![player::Sign::None; 3]; 3], *field.get_field());
+    }
+    #[test]
+    fn set_signs() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+        let mut result = vec![vec![player::Sign::None; 3]; 3];
+        assert_eq!(field.active_player().sign(), players[0].sign());
+
+        field.set_sign(0, 0);
+        result[0][0] = player::Sign::X;
+        assert_eq!(false, field.check_field());
+        assert_eq!(result, *field.get_field());
+        assert_eq!(field.active_player().sign(), players[1].sign());
+
+        // try to set sign on already used field
+        field.set_sign(0, 0);
+        assert_eq!(false, field.check_field());
+        assert_eq!(result, *field.get_field());
+        assert_eq!(field.active_player().sign(), players[1].sign());
+
+        field.set_sign(1, 0);
+        result[1][0] = player::Sign::O;
+        assert_eq!(false, field.check_field());
+        assert_eq!(result, *field.get_field());
+        assert_eq!(field.active_player().sign(), players[0].sign());
+
+        field.set_sign(0, 2);
+        result[0][2] = player::Sign::X;
+
+        assert_eq!(false, field.check_field());
+        assert_eq!(result, *field.get_field());
+        assert_eq!(field.active_player().sign(), players[1].sign());
+    }
+
+    #[test]
+    fn first_row_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(0, 0); // X
+        field.set_sign(1, 0); // O
+        field.set_sign(0, 1); // X
+        field.set_sign(1, 1); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(0, 2); // X
+
+        assert!(field.check_field());
+    }
+
+    #[test]
+    fn second_row_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(1, 0); // X
+        field.set_sign(2, 0); // O
+        field.set_sign(1, 1); // X
+        field.set_sign(2, 1); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(1, 2); // X
+
+        assert!(field.check_field());
+    }
+    #[test]
+    fn third_row_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(2, 0); // X
+        field.set_sign(1, 0); // O
+        field.set_sign(2, 1); // X
+        field.set_sign(1, 1); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(2, 2); // X
+
+        assert!(field.check_field());
+    }
+    #[test]
+    fn first_column_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(0, 0); // X
+        field.set_sign(0, 1); // O
+        field.set_sign(1, 0); // X
+        field.set_sign(0, 2); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(2, 0); // X
+
+        assert!(field.check_field());
+    }
+    #[test]
+    fn second_column_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(0, 1); // X
+        field.set_sign(0, 2); // O
+        field.set_sign(1, 1); // X
+        field.set_sign(2, 2); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(2, 1); // X
+        assert!(field.check_field());
+    }
+    #[test]
+    fn third_column_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(0, 2); // X
+        field.set_sign(0, 1); // O
+        field.set_sign(1, 2); // X
+        field.set_sign(0, 0); // O
+        assert_eq!(false, field.check_field());
+        field.set_sign(2, 2); // X
+        assert!(field.check_field());
+    }
+
+    #[test]
+    fn top_left_bottom_right_diagonal_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+        field.set_sign(0, 0); // X
+        field.set_sign(1, 0); // O
+        field.set_sign(1, 1); // X
+        field.set_sign(2, 1); // O
+        field.set_sign(2, 2); // X
+        assert!(field.check_field());
+    }
+
+    #[test]
+    fn bottom_left_top_right_diagonal_wins() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+        field.set_sign(2, 0); // X
+        field.set_sign(1, 0); // O
+        field.set_sign(1, 1); // X
+        field.set_sign(2, 1); // O
+        field.set_sign(0, 2); // X
+        assert!(field.check_field());
+    }
+}
 pub mod game_field {
     use super::player;
     pub type Field = Vec<Vec<player::Sign>>;
@@ -113,7 +299,9 @@ pub mod game_field {
     }
 
     impl GameField {
-        pub fn new(size: usize, player: [player::Player; 2]) -> GameField {
+        pub fn new(size: usize, mut player: [player::Player; 2]) -> GameField {
+            player[0].activate();
+            player[1].deactivate();
             GameField {
                 field: vec![vec![player::Sign::None; size]; size],
                 player: player,
@@ -125,6 +313,69 @@ pub mod game_field {
                 self.field[row][col] = *self.active_player().sign();
                 GameField::swap_player(self);
             }
+        }
+
+        pub fn check_field(&self) -> bool {
+            return self.check_rows() || self.check_columns() || self.check_diagonals();
+        }
+
+        fn check_rows(&self) -> bool {
+            let iter = (0..self.field.len()).map(|index| {
+                self.field
+                    .iter()
+                    .flatten()
+                    .skip(index)
+                    .step_by(self.field.len())
+            });
+            for (_, mut rows) in iter.enumerate() {
+                if rows.all(|&sign| sign == player::Sign::O)
+                    || rows.all(|&sign| sign == player::Sign::X)
+                {
+                    return true;
+                }
+            }
+            false
+        }
+
+        fn check_columns(&self) -> bool {
+            for column in self.field.iter() {
+                if column.iter().all(|&sign| sign == player::Sign::O)
+                    || column.iter().all(|&sign| sign == player::Sign::X)
+                {
+                    return true;
+                }
+            }
+            false
+        }
+
+        fn check_diagonals(&self) -> bool {
+            let mut top_left_bottom_right: Vec<player::Sign> = Vec::new();
+            let mut bottom_left_top_right: Vec<player::Sign> = Vec::new();
+            for i in 0..self.field.len() {
+                top_left_bottom_right.push(self.field[i][i]);
+                bottom_left_top_right.push(self.field[self.field.len() - i - 1][i]);
+            }
+            if top_left_bottom_right
+                .iter()
+                .all(|&sign| sign == player::Sign::O)
+                || top_left_bottom_right
+                    .iter()
+                    .all(|&sign| sign == player::Sign::X)
+            {
+                return true;
+            }
+
+            if bottom_left_top_right
+                .iter()
+                .all(|&sign| sign == player::Sign::O)
+                || bottom_left_top_right
+                    .iter()
+                    .all(|&sign| sign == player::Sign::X)
+            {
+                return true;
+            }
+
+            false
         }
 
         pub fn get_field(&self) -> &Field {
