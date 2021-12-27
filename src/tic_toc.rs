@@ -26,7 +26,7 @@ mod player_tests {
     }
 
     #[test]
-    fn print_signs() {
+    fn verify_signs() {
         assert_eq!("X", format!("{}", player::Sign::X));
         assert_eq!("O", format!("{}", player::Sign::O));
         assert_eq!("-", format!("{}", player::Sign::None));
@@ -305,16 +305,16 @@ pub mod game_field {
 
     pub struct GameField {
         field: Field,
-        player: [player::Player; 2],
+        players: [player::Player; 2],
     }
 
     impl GameField {
-        pub fn new(size: usize, mut player: [player::Player; 2]) -> GameField {
-            player[0].activate();
-            player[1].deactivate();
+        pub fn new(size: usize, mut new_players: [player::Player; 2]) -> GameField {
+            new_players[0].activate();
+            new_players[1].deactivate();
             GameField {
                 field: vec![vec![player::Sign::None; size]; size],
-                player: player,
+                players: new_players,
             }
         }
 
@@ -324,6 +324,9 @@ pub mod game_field {
             }
             if self.field[row][col] == player::Sign::None {
                 self.field[row][col] = *self.active_player().sign();
+                if self.check_field() {
+                    return;
+                }
                 GameField::swap_player(self);
             }
         }
@@ -333,7 +336,14 @@ pub mod game_field {
         }
 
         pub fn check_field(&self) -> bool {
-            return self.check_rows() || self.check_columns() || self.check_diagonals();
+            self.check_rows() || self.check_columns() || self.check_diagonals()
+        }
+
+        pub fn get_winner(&self) -> Option<&player::Player> {
+            if self.check_field() {
+                return Some(self.active_player());
+            }
+            None
         }
 
         fn check_rows(&self) -> bool {
@@ -400,40 +410,55 @@ pub mod game_field {
         }
 
         pub fn swap_player(&mut self) {
-            if *self.active_player() == self.player[0] {
-                self.player[0].deactivate();
-                self.player[1].activate();
+            if *self.active_player() == self.players[0] {
+                self.players[0].deactivate();
+                self.players[1].activate();
             } else {
-                self.player[0].activate();
-                self.player[1].deactivate();
+                self.players[0].activate();
+                self.players[1].deactivate();
             }
         }
 
         pub fn active_player(&self) -> &player::Player {
-            if self.player[1].is_active() {
-                return &self.player[1];
+            if self.players[1].is_active() {
+                return &self.players[1];
             }
-            return &self.player[0];
+            &self.players[0]
         }
     }
 }
 
 pub mod game {
+    use crate::ui::*;
+
     use super::game_field;
     use super::player;
     pub struct Game {
-        gamefield: game_field::GameField,
+        pub gamefield: game_field::GameField,
     }
     impl Game {
-        pub fn new(&mut self) {
-            let mut players = [
-                player::Player::new(1).expect("No error"),
-                player::Player::new(2).expect("No error"),
-            ];
-            players[0].activate();
-            self.gamefield = game_field::GameField::new(3, players);
+        pub fn new() -> Game {
+            let new_gamefield = game_field::GameField::new(3, Game::create_players());
+            Game {
+                gamefield: new_gamefield,
+            }
         }
 
-        pub fn start(&mut self) {}
+        fn create_players() -> [player::Player; 2] {
+            [
+                player::Player::new(1).expect("No error"),
+                player::Player::new(2).expect("No error"),
+            ]
+        }
+
+        pub fn restart(&mut self) {
+            self.gamefield = game_field::GameField::new(3, Game::create_players());
+        }
+
+        pub fn run(&mut self) {
+            loop {
+                display(self);
+            }
+        }
     }
 }
