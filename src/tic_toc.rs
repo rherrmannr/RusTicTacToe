@@ -158,6 +158,16 @@ mod game_field_tests {
     }
 
     #[test]
+    fn set_invalid_sign() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+        field.set_sign(3, 0);
+    }
+
+    #[test]
     fn first_row_wins() {
         let players = [
             player::Player::new(1).expect("No error"),
@@ -309,10 +319,17 @@ pub mod game_field {
         }
 
         pub fn set_sign(&mut self, row: usize, col: usize) {
+            if !self.sign_is_valid(row, col) {
+                return;
+            }
             if self.field[row][col] == player::Sign::None {
                 self.field[row][col] = *self.active_player().sign();
                 GameField::swap_player(self);
             }
+        }
+
+        fn sign_is_valid(&self, row: usize, col: usize) -> bool {
+            row < self.field.len() && col < self.field.len()
         }
 
         pub fn check_field(&self) -> bool {
