@@ -270,6 +270,21 @@ mod game_field_tests {
     }
 
     #[test]
+    fn column_does_not_win() {
+        let players = [
+            player::Player::new(1).expect("No error"),
+            player::Player::new(2).expect("No error"),
+        ];
+        let mut field = game_field::GameField::new(3, players);
+
+        field.set_sign(1, 1); // X
+        field.set_sign(0, 0); // O
+        field.set_sign(0, 1); // X
+        field.set_sign(1, 0); // O
+        assert_eq!(false, field.check_field());
+    }
+
+    #[test]
     fn top_left_bottom_right_diagonal_wins() {
         let players = [
             player::Player::new(1).expect("No error"),
@@ -280,6 +295,7 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 1); // O
+        assert_eq!(false, field.check_field());
         field.set_sign(2, 2); // X
         assert!(field.check_field());
     }
@@ -295,6 +311,7 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 1); // O
+        assert_eq!(false, field.check_field());
         field.set_sign(0, 2); // X
         assert!(field.check_field());
     }
@@ -354,10 +371,8 @@ pub mod game_field {
                     .skip(index)
                     .step_by(self.field.len())
             });
-            for (_, mut rows) in iter.enumerate() {
-                if rows.all(|&sign| sign == player::Sign::O)
-                    || rows.all(|&sign| sign == player::Sign::X)
-                {
+            for (_, rows) in iter.enumerate() {
+                if GameField::check_lines(rows) {
                     return true;
                 }
             }
@@ -366,13 +381,26 @@ pub mod game_field {
 
         fn check_columns(&self) -> bool {
             for column in self.field.iter() {
-                if column.iter().all(|&sign| sign == player::Sign::O)
-                    || column.iter().all(|&sign| sign == player::Sign::X)
-                {
+                if GameField::check_lines(column.iter()) {
                     return true;
                 }
             }
             false
+        }
+
+        fn check_lines<'a, I>(iter: I) -> bool
+        where
+            I: Iterator<Item = &'a player::Sign> + Clone,
+        {
+            GameField::check_line(iter.clone(), player::Sign::O)
+                || GameField::check_line(iter, player::Sign::X)
+        }
+
+        fn check_line<'a, I>(iter: I, sign: player::Sign) -> bool
+        where
+            I: Iterator<Item = &'a player::Sign>,
+        {
+            iter.into_iter().all(|&it| it == sign)
         }
 
         fn check_diagonals(&self) -> bool {
@@ -382,26 +410,18 @@ pub mod game_field {
                 top_left_bottom_right.push(self.field[i][i]);
                 bottom_left_top_right.push(self.field[self.field.len() - i - 1][i]);
             }
-            if top_left_bottom_right
-                .iter()
-                .all(|&sign| sign == player::Sign::O)
-                || top_left_bottom_right
-                    .iter()
-                    .all(|&sign| sign == player::Sign::X)
-            {
+            if GameField::check_line(top_left_bottom_right.iter(), player::Sign::O) {
                 return true;
             }
-
-            if bottom_left_top_right
-                .iter()
-                .all(|&sign| sign == player::Sign::O)
-                || bottom_left_top_right
-                    .iter()
-                    .all(|&sign| sign == player::Sign::X)
-            {
+            if GameField::check_line(top_left_bottom_right.iter(), player::Sign::X) {
                 return true;
             }
-
+            if GameField::check_line(bottom_left_top_right.iter(), player::Sign::O) {
+                return true;
+            }
+            if GameField::check_line(bottom_left_top_right.iter(), player::Sign::X) {
+                return true;
+            }
             false
         }
 
