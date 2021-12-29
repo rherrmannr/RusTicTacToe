@@ -1,11 +1,6 @@
-use super::tic_toc::game_field::GameField;
-
+use super::ui::UI;
+use crate::tic_toc::game_field::GameField;
 use std::io;
-
-pub trait UI {
-    fn display(&mut self, game_field: &GameField);
-    fn process_input(&self) -> Option<(usize, usize)>;
-}
 
 pub struct CLI {}
 

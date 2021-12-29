@@ -447,10 +447,9 @@ pub mod game_field {
         }
     }
 }
-
 pub mod game {
-    use crate::ui;
-    use crate::ui::*;
+    use crate::ui::ui::UI;
+    use crate::ui::cli::CLI;
 
     use super::game_field;
     use super::player;
@@ -461,7 +460,7 @@ pub mod game {
     impl Game {
         pub fn new() -> Game {
             let gamefield = game_field::GameField::new(3, Game::create_players());
-            let ui = Box::new(ui::CLI::new());
+            let ui = Box::new(CLI::new());
             Game { gamefield, ui }
         }
 
