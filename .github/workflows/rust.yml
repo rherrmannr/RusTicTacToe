@@ -15,6 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install libsdl2-dev
+      run: sudo apt install libsdl2-dev 
+    - name: Install libsdl2-mixer
+      run: sudo apt install libsdl2-mixer-dev
+    - name: Install libsdl2-image
+      run: sudo apt install libsdl2-image-dev 
+    - name: Install libsdl2-ttf
+      run: sudo apt install libsdl2-ttf-dev 
+    - name: Install libsdl2-gfx
+      run: sudo apt install libsdl2-gfx-dev 
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --verbose
