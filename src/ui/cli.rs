@@ -28,7 +28,7 @@ impl UI for CLI {
         }
     }
 
-    fn process_input(&self) -> Option<(usize, usize)> {
+    fn process_input(&mut self) -> Option<(usize, usize)> {
         Some(CLI::get_point())
     }
 }
