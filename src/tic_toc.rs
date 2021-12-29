@@ -449,19 +449,20 @@ pub mod game_field {
 }
 
 pub mod game {
+    use crate::ui;
     use crate::ui::*;
 
     use super::game_field;
     use super::player;
     pub struct Game {
-        pub gamefield: game_field::GameField,
+        gamefield: game_field::GameField,
+        ui: Box<dyn UI>,
     }
     impl Game {
         pub fn new() -> Game {
-            let new_gamefield = game_field::GameField::new(3, Game::create_players());
-            Game {
-                gamefield: new_gamefield,
-            }
+            let gamefield = game_field::GameField::new(3, Game::create_players());
+            let ui = Box::new(ui::CLI::new());
+            Game { gamefield, ui }
         }
 
         fn create_players() -> [player::Player; 2] {
@@ -471,13 +472,26 @@ pub mod game {
             ]
         }
 
+        fn update(&mut self, point: Option<(usize, usize)>) {
+            match point {
+                Some(point) => self.gamefield.set_sign(point.0, point.1),
+                None => {}
+            }
+            if self.gamefield.get_winner() != None {
+                self.ui.display(&self.gamefield);
+                self.restart();
+            }
+        }
+
         pub fn restart(&mut self) {
             self.gamefield = game_field::GameField::new(3, Game::create_players());
         }
 
         pub fn run(&mut self) {
             loop {
-                display(self);
+                self.ui.display(&self.gamefield);
+                let input = self.ui.process_input();
+                self.update(input);
             }
         }
     }
