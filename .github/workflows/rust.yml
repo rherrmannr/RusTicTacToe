@@ -28,15 +28,18 @@ jobs:
       run: sudo apt install libsdl2-gfx-dev 
     - uses: actions/checkout@v2
     # build
-    - name: Build
+    - name: Debug Build
       run: cargo build --verbose
+    - name: Release Build
+      run: cargo build --verbose --release
     # tests
     - name: Run tests
       run: cargo test --verbose
     
-    # provide artifacts
-    - name: Upload artifacts
+    # upload artifacts
+    - name: Upload release artifacts
       uses: actions/upload-artifact@v2
       with: 
         name: artifacts
-        path: target
+        path: target/release
+
