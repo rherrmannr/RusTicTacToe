@@ -33,3 +33,10 @@ jobs:
     # tests
     - name: Run tests
       run: cargo test --verbose
+    
+    # provide artifacts
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with: 
+        name: artifacts
+        path: target
