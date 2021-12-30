@@ -37,9 +37,15 @@ jobs:
       run: cargo test --verbose
     
     # upload artifacts
-    - name: Upload release artifacts
+    - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with: 
         name: artifacts
-        path: target/release
+        path: target
 
+    # upload artifacts
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with: 
+        name: RusTicTacToe
+        path: target/release/tictoc
