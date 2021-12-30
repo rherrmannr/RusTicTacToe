@@ -44,6 +44,8 @@ jobs:
         path: target
 
     # upload artifacts
+    - name: Add execution permission
+      run: chmod +x target/release/tictoc
     - name: Upload binary
       uses: actions/upload-artifact@v2
       with: 
