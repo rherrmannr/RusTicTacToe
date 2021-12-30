@@ -1,25 +1,24 @@
-use super::ui::*;
+use super::ui_base::*;
 use crate::tic_toc::game_field::GameField;
 use std::io;
 
-pub struct CLI {}
+pub struct Cli {}
 
-impl CLI {
-    pub fn new() -> CLI {
-        CLI {}
+impl Cli {
+    pub fn new() -> Cli {
+        Cli {}
     }
 }
 
-impl UI for CLI {
+impl UI for Cli {
     fn display(&mut self, game_field: &GameField) {
-        CLI::print_gamefield(game_field);
+        Cli::print_gamefield(game_field);
 
         match game_field.get_winner() {
             Some(player) => {
                 println!();
                 println!("{} has won!", player.sign());
                 println!();
-                return;
             }
             None => {
                 println!();
@@ -29,11 +28,11 @@ impl UI for CLI {
     }
 
     fn process_input(&mut self) -> Event {
-        Event::Point(CLI::get_point())
+        Event::Point(Cli::get_point())
     }
 }
 
-impl CLI {
+impl Cli {
     fn print_gamefield(game_field: &GameField) {
         for row in game_field.get_field() {
             for col in row {
@@ -46,9 +45,9 @@ impl CLI {
     pub fn get_point() -> (usize, usize) {
         let mut result = (0, 0);
         println!("Type in the row.");
-        result.0 = CLI::read_single_input();
+        result.0 = Cli::read_single_input();
         println!("Type in the column.");
-        result.1 = CLI::read_single_input();
+        result.1 = Cli::read_single_input();
         println!();
         result
     }

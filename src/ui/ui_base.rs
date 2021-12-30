@@ -1,8 +1,8 @@
 use crate::tic_toc::game_field::GameField;
 
 pub enum Mode {
-    GUI,
-    CLI,
+    Gui,
+    Cli,
 }
 
 pub enum Event {

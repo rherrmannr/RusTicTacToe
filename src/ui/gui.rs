@@ -1,5 +1,4 @@
-use super::ui::*;
-
+use super::ui_base::*;
 
 use crate::tic_toc::game_field::GameField;
 
@@ -12,13 +11,13 @@ use sdl2::{pixels, EventPump};
 const SCREEN_WIDTH: u32 = 800;
 const SCREEN_HEIGHT: u32 = 600;
 
-pub struct GUI {
+pub struct Gui {
     canvas: Canvas<Window>,
     events: EventPump,
 }
 
-impl GUI {
-    pub fn new() -> GUI {
+impl Gui {
+    pub fn new() -> Gui {
         let sdl_context = sdl2::init().unwrap();
 
         let video_subsys = sdl_context.video().unwrap();
@@ -42,12 +41,11 @@ impl GUI {
         canvas.present();
         let events = sdl_context.event_pump().unwrap();
 
-        let gui = GUI { canvas, events };
-        gui
+        Gui { canvas, events }
     }
 }
 
-impl UI for GUI {
+impl UI for Gui {
     fn display(&mut self, _game_field: &GameField) {
         self.canvas.present();
     }
