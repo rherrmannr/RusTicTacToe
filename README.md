@@ -1,6 +1,6 @@
 [![TicToc](https://github.com/rherrmannr/RustTicTacToe/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rherrmannr/RustTicTacToe/actions/workflows/rust.yml)
 # RusTicTacToe
-CLI and GUI based TicTacToe implemented in Rust.
+CLI and GUI based TicTacToe implemented in Rust. Using SDL2 for GUI https://github.com/Rust-SDL2/rust-sdl2.
 
 ## Build, Run and Test
 In order to build the project run:
