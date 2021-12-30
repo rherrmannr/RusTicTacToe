@@ -1,12 +1,15 @@
 [![TicToc](https://github.com/rherrmannr/RustTicTacToe/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rherrmannr/RustTicTacToe/actions/workflows/rust.yml)
-# RustTicTacToe
-Command line based TicTacToe implemented in Rust.
+# RusTicTacToe
+CLI and GUI based TicTacToe implemented in Rust.
 
 ## Build, Run and Test
 In order to build the project run:
 ```
 $ cargo build 
+# run with CLI
 $ cargo run
+# run with GUI
+$ cargo run -- gui
 ```
 Tests can be executed with:
 ```
