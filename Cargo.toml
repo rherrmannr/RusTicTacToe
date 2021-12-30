@@ -8,4 +8,4 @@ edition = "2018"
 [dependencies.sdl2]
 version = "0.35"
 default-features = false
-features = ["bundled", "ttf","image","gfx","mixer"]
+features = ["ttf", "image", "gfx", "mixer", "static-link", "use-pkgconfig"]
