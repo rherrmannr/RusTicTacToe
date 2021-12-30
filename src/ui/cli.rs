@@ -27,7 +27,7 @@ impl UI for Cli {
         }
     }
 
-    fn process_input(&mut self) -> Event {
+    fn process_input(&mut self, _game_field: &GameField) -> Event {
         Event::Point(Cli::get_point())
     }
 }

@@ -13,5 +13,5 @@ pub enum Event {
 
 pub trait UI {
     fn display(&mut self, game_field: &GameField);
-    fn process_input(&mut self) -> Event;
+    fn process_input(&mut self, game_field: &GameField) -> Event;
 }

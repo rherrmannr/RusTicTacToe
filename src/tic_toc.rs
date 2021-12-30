@@ -120,6 +120,7 @@ mod game_field_tests {
         assert_eq!(false, field.check_field());
 
         assert_eq!(vec![vec![player::Sign::None; 3]; 3], *field.get_field());
+        assert_eq!(3, field.size());
     }
     #[test]
     fn set_signs() {
@@ -445,6 +446,10 @@ pub mod game_field {
             }
             &self.players[0]
         }
+
+        pub fn size(&self) -> usize {
+            self.field.len()
+        }
     }
 }
 pub mod game {
@@ -501,7 +506,7 @@ pub mod game {
             self.active = true;
             while self.active {
                 self.ui.display(&self.gamefield);
-                let event = self.ui.process_input();
+                let event = self.ui.process_input(&self.gamefield);
                 self.update(event);
             }
         }
