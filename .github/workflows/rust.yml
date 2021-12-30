@@ -30,3 +30,11 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: my-artifact
+    
+    - name: Display structure of downloaded files
+      run: ls -R
