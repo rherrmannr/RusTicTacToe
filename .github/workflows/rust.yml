@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # install libs required by sdl2
     - name: Install libsdl2-dev
       run: sudo apt install libsdl2-dev 
     - name: Install libsdl2-mixer
@@ -26,15 +27,9 @@ jobs:
     - name: Install libsdl2-gfx
       run: sudo apt install libsdl2-gfx-dev 
     - uses: actions/checkout@v2
+    # build
     - name: Build
       run: cargo build --verbose
+    # tests
     - name: Run tests
       run: cargo test --verbose
-    
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
-      with:
-        name: my-artifact
-    
-    - name: Display structure of downloaded files
-      run: ls -R
