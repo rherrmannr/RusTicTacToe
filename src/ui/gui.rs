@@ -1,9 +1,9 @@
-use super::ui::UI;
+use super::ui::*;
+
 
 use crate::tic_toc::game_field::GameField;
 
 extern crate sdl2;
-use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
@@ -48,12 +48,15 @@ impl GUI {
 }
 
 impl UI for GUI {
-    fn display(&mut self, _game_field: &GameField) {}
-    fn process_input(&mut self) -> Option<(usize, usize)> {
+    fn display(&mut self, _game_field: &GameField) {
+        self.canvas.present();
+    }
+
+    fn process_input(&mut self) -> Event {
         for event in self.events.poll_iter() {
             match event {
-                // Event::Quit { .. } => break 'main,
-                Event::KeyDown {
+                sdl2::event::Event::Quit { .. } => return Event::Quit,
+                sdl2::event::Event::KeyDown {
                     keycode: Some(keycode),
                     ..
                 } => {
@@ -62,17 +65,15 @@ impl UI for GUI {
                     } else {
                         println!("Some key has been pressed..");
                     }
-                    self.canvas.present();
                 }
 
-                Event::MouseButtonDown { x, y, .. } => {
+                sdl2::event::Event::MouseButtonDown { x, y, .. } => {
                     println!("mouse btn down at ({},{})", x, y);
-                    self.canvas.present();
                 }
 
                 _ => {}
             }
         }
-        None
+        Event::None
     }
 }

@@ -1,4 +1,4 @@
-use super::ui::UI;
+use super::ui::*;
 use crate::tic_toc::game_field::GameField;
 use std::io;
 
@@ -28,8 +28,8 @@ impl UI for CLI {
         }
     }
 
-    fn process_input(&mut self) -> Option<(usize, usize)> {
-        Some(CLI::get_point())
+    fn process_input(&mut self) -> Event {
+        Event::Point(CLI::get_point())
     }
 }
 

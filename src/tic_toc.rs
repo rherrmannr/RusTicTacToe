@@ -457,6 +457,7 @@ pub mod game {
     pub struct Game {
         gamefield: game_field::GameField,
         ui: Box<dyn UI>,
+        active: bool,
     }
     impl Game {
         pub fn new(mode: Mode) -> Game {
@@ -466,7 +467,11 @@ pub mod game {
                 Mode::CLI => ui = Box::new(CLI::new()),
                 Mode::GUI => ui = Box::new(GUI::new()),
             }
-            Game { gamefield, ui }
+            Game {
+                gamefield,
+                ui,
+                active: false,
+            }
         }
 
         fn create_players() -> [player::Player; 2] {
@@ -476,10 +481,11 @@ pub mod game {
             ]
         }
 
-        fn update(&mut self, point: Option<(usize, usize)>) {
-            match point {
-                Some(point) => self.gamefield.set_sign(point.0, point.1),
-                None => {}
+        fn update(&mut self, event: Event) {
+            match event {
+                Event::Quit => self.active = false,
+                Event::Point((row, column)) => self.gamefield.set_sign(row, column),
+                Event::None => {}
             }
             if self.gamefield.get_winner() != None {
                 self.ui.display(&self.gamefield);
@@ -492,10 +498,11 @@ pub mod game {
         }
 
         pub fn run(&mut self) {
-            loop {
+            self.active = true;
+            while self.active {
                 self.ui.display(&self.gamefield);
-                let input = self.ui.process_input();
-                self.update(input);
+                let event = self.ui.process_input();
+                self.update(event);
             }
         }
     }
