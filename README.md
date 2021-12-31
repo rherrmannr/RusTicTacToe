@@ -55,3 +55,6 @@ X has won!
 It's X's turn.
 Type in the row.
 ```
+
+## Fonts
+Font source https://www.dafont.com/de/

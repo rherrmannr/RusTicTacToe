@@ -117,7 +117,7 @@ mod game_field_tests {
 
         assert_eq!(field.active_player().sign(), players[0].sign());
         assert_ne!(field.active_player().sign(), players[1].sign());
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
 
         assert_eq!(vec![vec![player::Sign::None; 3]; 3], *field.get_field());
         assert_eq!(3, field.size());
@@ -134,26 +134,26 @@ mod game_field_tests {
 
         field.set_sign(0, 0);
         result[0][0] = player::Sign::X;
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         assert_eq!(result, *field.get_field());
         assert_eq!(field.active_player().sign(), players[1].sign());
 
         // try to set sign on already used field
         field.set_sign(0, 0);
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         assert_eq!(result, *field.get_field());
         assert_eq!(field.active_player().sign(), players[1].sign());
 
         field.set_sign(1, 0);
         result[1][0] = player::Sign::O;
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         assert_eq!(result, *field.get_field());
         assert_eq!(field.active_player().sign(), players[0].sign());
 
         field.set_sign(0, 2);
         result[0][2] = player::Sign::X;
 
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         assert_eq!(result, *field.get_field());
         assert_eq!(field.active_player().sign(), players[1].sign());
     }
@@ -180,10 +180,10 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(0, 1); // X
         field.set_sign(1, 1); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(0, 2); // X
 
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
 
     #[test]
@@ -198,10 +198,10 @@ mod game_field_tests {
         field.set_sign(2, 0); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 1); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(1, 2); // X
 
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
     #[test]
     fn third_row_wins() {
@@ -215,10 +215,10 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(2, 1); // X
         field.set_sign(1, 1); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(2, 2); // X
 
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
     #[test]
     fn first_column_wins() {
@@ -232,10 +232,10 @@ mod game_field_tests {
         field.set_sign(0, 1); // O
         field.set_sign(1, 0); // X
         field.set_sign(0, 2); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(2, 0); // X
 
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
     #[test]
     fn second_column_wins() {
@@ -249,9 +249,9 @@ mod game_field_tests {
         field.set_sign(0, 2); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 2); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(2, 1); // X
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
     #[test]
     fn third_column_wins() {
@@ -265,9 +265,9 @@ mod game_field_tests {
         field.set_sign(0, 1); // O
         field.set_sign(1, 2); // X
         field.set_sign(0, 0); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(2, 2); // X
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
 
     #[test]
@@ -282,7 +282,7 @@ mod game_field_tests {
         field.set_sign(0, 0); // O
         field.set_sign(0, 1); // X
         field.set_sign(1, 0); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
     }
 
     #[test]
@@ -296,9 +296,9 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 1); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(2, 2); // X
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
 
     #[test]
@@ -312,9 +312,9 @@ mod game_field_tests {
         field.set_sign(1, 0); // O
         field.set_sign(1, 1); // X
         field.set_sign(2, 1); // O
-        assert_eq!(false, field.check_field());
+        assert_eq!(false, field.has_winner());
         field.set_sign(0, 2); // X
-        assert!(field.check_field());
+        assert!(field.has_winner());
     }
 }
 pub mod game_field {
@@ -324,6 +324,11 @@ pub mod game_field {
     pub struct GameField {
         field: Field,
         players: [player::Player; 2],
+    }
+    pub enum State {
+        Playing,
+        Draw,
+        Winner(player::Player),
     }
 
     impl GameField {
@@ -337,12 +342,15 @@ pub mod game_field {
         }
 
         pub fn set_sign(&mut self, row: usize, col: usize) {
+            if self.has_winner() {
+                return;
+            }
             if !self.sign_is_valid(row, col) {
                 return;
             }
             if self.field[row][col] == player::Sign::None {
                 self.field[row][col] = *self.active_player().sign();
-                if self.check_field() {
+                if self.has_winner() {
                     return;
                 }
                 GameField::swap_player(self);
@@ -353,12 +361,26 @@ pub mod game_field {
             row < self.field.len() && col < self.field.len()
         }
 
-        pub fn check_field(&self) -> bool {
+        pub fn has_winner(&self) -> bool {
             self.check_rows() || self.check_columns() || self.check_diagonals()
         }
 
+        pub fn is_draw(&self) -> bool {
+            self.field.iter().flatten().filter(|&&sign| sign == player::Sign::None).count() == 0
+        }
+
+        pub fn get_state(&self) -> State {
+            if self.has_winner() {
+                return State::Winner(*self.active_player());
+            }
+            if self.is_draw() {
+                return State::Draw;
+            }
+            State::Playing
+        }
+
         pub fn get_winner(&self) -> Option<&player::Player> {
-            if self.check_field() {
+            if self.has_winner() {
                 return Some(self.active_player());
             }
             None
@@ -490,11 +512,8 @@ pub mod game {
             match event {
                 Event::Quit => self.active = false,
                 Event::Point((row, column)) => self.gamefield.set_sign(row, column),
+                Event::Restart => self.restart(),
                 Event::None => {}
-            }
-            if self.gamefield.get_winner() != None {
-                self.ui.display(&self.gamefield);
-                self.restart();
             }
         }
 
@@ -505,9 +524,9 @@ pub mod game {
         pub fn run(&mut self) {
             self.active = true;
             while self.active {
-                self.ui.display(&self.gamefield);
                 let event = self.ui.process_input(&self.gamefield);
                 self.update(event);
+                self.ui.display(&self.gamefield);
             }
         }
     }

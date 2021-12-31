@@ -8,6 +8,7 @@ pub enum Mode {
 pub enum Event {
     Quit,
     Point((usize, usize)),
+    Restart,
     None,
 }
 

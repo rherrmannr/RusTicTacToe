@@ -1,11 +1,14 @@
 use super::ui_base::*;
 
-use crate::tic_toc::game_field::GameField;
+use crate::tic_toc::game_field::{GameField, State};
+use crate::tic_toc::player::Player;
 
 extern crate sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
-use sdl2::render::Canvas;
+use sdl2::rect::Rect;
+use sdl2::render::{Canvas, TextureQuery};
+use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::Window;
 use sdl2::EventPump;
 
@@ -21,12 +24,20 @@ mod color {
     pub const FIELD: Color = Color::RGB(205, 205, 205);
     pub const O: Color = Color::RGB(255, 95, 31);
     pub const X: Color = Color::RGB(255, 16, 240);
+    pub const FONT: Color = Color::RGB(195, 195, 195);
 }
 
 pub struct Gui {
     canvas: Canvas<Window>,
     events: EventPump,
+    ttf_context: Sdl2TtfContext,
 }
+
+macro_rules! rect(
+    ($x:expr, $y:expr, $w:expr, $h:expr) => (
+        Rect::new($x as i32, $y as i32, $w as u32, $h as u32)
+    )
+);
 
 impl Gui {
     pub fn new() -> Gui {
@@ -48,13 +59,18 @@ impl Gui {
             .build()
             .map_err(|e| e.to_string())
             .unwrap();
-
         canvas.set_draw_color(color::BACKGROUND);
         canvas.clear();
         canvas.present();
-        let events = sdl_context.event_pump().unwrap();
 
-        Gui { canvas, events }
+        let events = sdl_context.event_pump().unwrap();
+        let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string()).unwrap();
+
+        Gui {
+            canvas,
+            events,
+            ttf_context,
+        }
     }
 
     fn screen_width(&self) -> u32 {
@@ -98,6 +114,72 @@ impl Gui {
             }
         }
     }
+
+    fn get_centered_rect(
+        &self,
+        rect_width: u32,
+        rect_height: u32,
+        cons_width: u32,
+        cons_height: u32,
+    ) -> Rect {
+        let wr = rect_width as f32 / cons_width as f32;
+        let hr = rect_height as f32 / cons_height as f32;
+
+        let (w, h) = if wr > 1f32 || hr > 1f32 {
+            if wr > hr {
+                println!("Scaling down! The text will look worse!");
+                let h = (rect_height as f32 / wr) as i32;
+                (cons_width as i32, h)
+            } else {
+                println!("Scaling down! The text will look worse!");
+                let w = (rect_width as f32 / hr) as i32;
+                (w, cons_height as i32)
+            }
+        } else {
+            (rect_width as i32, rect_height as i32)
+        };
+
+        let cx = (self.screen_width() as i32 - w) / 2;
+        let cy = (self.screen_height() as i32 - h) / 2;
+        rect!(cx, cy, w, h)
+    }
+
+    fn draw_draw(&mut self) {
+        self.draw_text("It's a draw!".to_string());
+    }
+
+    fn draw_player_has_won(&mut self, player: &Player) {
+        self.draw_text(format!("Player {} has won!", player.sign()).to_owned());
+    }
+
+    fn draw_text(&mut self, text: String) {
+        // let text = &text;
+        let texture_creator = self.canvas.texture_creator();
+        let mut font = self
+            .ttf_context
+            .load_font("fonts/pilotcommand.ttf", 128)
+            .unwrap();
+        font.set_style(sdl2::ttf::FontStyle::BOLD);
+        let surface = font
+            .render(&text)
+            .blended(color::FONT)
+            .map_err(|e| e.to_string())
+            .unwrap();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .map_err(|e| e.to_string())
+            .unwrap();
+        let TextureQuery { width, height, .. } = texture.query();
+        let padding = 64;
+        let target = self.get_centered_rect(
+            width,
+            height,
+            self.screen_width() - padding,
+            self.screen_height() - padding,
+        );
+        self.canvas.copy(&texture, None, Some(target)).unwrap();
+    }
+
     fn draw_game_field(&mut self, game_field: &GameField) {
         self.draw_field(game_field);
         self.draw_signs(game_field);
@@ -131,6 +213,11 @@ impl UI for Gui {
         self.canvas.set_draw_color(color::BACKGROUND);
         self.canvas.clear();
         self.draw_game_field(game_field);
+        match game_field.get_state() {
+            State::Winner(winner) => self.draw_player_has_won(&winner),
+            State::Draw => self.draw_draw(),
+            State::Playing => {}
+        }
         self.canvas.present();
     }
 
@@ -142,13 +229,16 @@ impl UI for Gui {
                     keycode: Some(keycode),
                     ..
                 } => {
-                    if keycode == Keycode::Escape {
-                        return Event::Quit;
+                    if keycode == Keycode::R {
+                        return Event::Restart;
                     }
                 }
-                sdl2::event::Event::MouseButtonDown { x, y, .. } => {
-                    return Event::Point(self.coordinates_as_point(x, y, game_field));
-                }
+                sdl2::event::Event::MouseButtonDown { x, y, .. } => match game_field.get_state() {
+                    State::Playing => {
+                        return Event::Point(self.coordinates_as_point(x, y, game_field))
+                    }
+                    State::Draw | State::Winner(_) => return Event::Restart,
+                },
 
                 _ => {}
             }
