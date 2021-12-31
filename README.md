@@ -5,21 +5,26 @@ CLI and GUI based TicTacToe implemented in Rust. Using SDL2 for GUI https://gith
 ## Build, Run and Test
 In order to build the project run:
 ```
-$ cargo build 
-# run with CLI
-$ cargo run
-# run with GUI
-$ cargo run -- gui
+cargo build 
+```
+Start the game with CLI:
+```
+cargo run
+```
+Start the game with GUI:
+```
+cargo run -- gui
 ```
 Tests can be executed with:
 ```
-$ cargo test
+cargo test
 ```
 
 ## Playing the Game
-
+### With GUI
 ![Alt Text](gifs/demo.gif)
 
+### With CLI
 Payer `X` starts the game. The command line expects numbers between `0` and `2` for selecting the row and column. If the field is already in use, the user can repeat the selection, until the sign is set.
 ```
 It's X's turn.
