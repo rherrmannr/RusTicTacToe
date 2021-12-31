@@ -1,5 +1,5 @@
 use super::ui_base::*;
-use crate::tic_toc::game_field::GameField;
+use crate::tic_toc::game_field::{GameField, State};
 use std::io;
 
 pub struct Cli {}
@@ -27,8 +27,11 @@ impl UI for Cli {
         }
     }
 
-    fn process_input(&mut self, _game_field: &GameField) -> Event {
-        Event::Point(Cli::get_point())
+    fn process_input(&mut self, game_field: &GameField) -> Event {
+        match game_field.get_state() {
+            State::Playing => return Event::Point(Cli::get_point()),
+            State::Draw | State::Winner(_) => return Event::Restart,
+        }
     }
 }
 
