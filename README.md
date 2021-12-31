@@ -17,6 +17,9 @@ $ cargo test
 ```
 
 ## Playing the Game
+
+![Alt Text](gifs/demo.gif)
+
 Payer `X` starts the game. The command line expects numbers between `0` and `2` for selecting the row and column. If the field is already in use, the user can repeat the selection, until the sign is set.
 ```
 It's X's turn.
