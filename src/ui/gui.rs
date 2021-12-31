@@ -165,7 +165,7 @@ impl Gui {
         let texture_creator = self.canvas.texture_creator();
         let mut font = self
             .ttf_context
-            .load_font("fonts/pilotcommand.ttf", 128)
+            .load_font("fonts/pilotcommand.ttf", 25)
             .unwrap();
         font.set_style(sdl2::ttf::FontStyle::BOLD);
         let surface = font
