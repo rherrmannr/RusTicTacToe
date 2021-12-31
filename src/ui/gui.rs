@@ -5,9 +5,11 @@ use crate::tic_tac_toe::player::Player;
 
 extern crate sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
+use sdl2::image::LoadSurface;
 use sdl2::keyboard::Keycode;
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, TextureQuery};
+use sdl2::surface::Surface;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::Window;
 use sdl2::EventPump;
@@ -45,7 +47,7 @@ impl Gui {
 
         let video_subsys = sdl_context.video().unwrap();
 
-        let window = video_subsys
+        let mut window = video_subsys
             .window("RusTicTacToe", screen::WIDTH, screen::HEIGHT)
             .position_centered()
             .opengl()
@@ -53,6 +55,9 @@ impl Gui {
             .build()
             .map_err(|e| e.to_string())
             .unwrap();
+
+        let window_icon = Surface::from_file("logos/tic-tac-toe_39453.png").unwrap();
+        window.set_icon(window_icon);
 
         let mut canvas = window
             .into_canvas()
@@ -62,6 +67,7 @@ impl Gui {
         canvas.set_draw_color(color::BACKGROUND);
         canvas.clear();
         canvas.present();
+
 
         let events = sdl_context.event_pump().unwrap();
         let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string()).unwrap();
