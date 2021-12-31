@@ -127,11 +127,9 @@ impl Gui {
 
         let (w, h) = if wr > 1f32 || hr > 1f32 {
             if wr > hr {
-                println!("Scaling down! The text will look worse!");
                 let h = (rect_height as f32 / wr) as i32;
                 (cons_width as i32, h)
             } else {
-                println!("Scaling down! The text will look worse!");
                 let w = (rect_width as f32 / hr) as i32;
                 (w, cons_height as i32)
             }
@@ -153,7 +151,11 @@ impl Gui {
     }
 
     fn draw_text(&mut self, text: String) {
-        // let text = &text;
+        let mut padding = 64;
+        // dynamic padding
+        if self.screen_width() < padding || self.screen_height() < padding {
+            padding = std::cmp::min(self.screen_width(), self.screen_height());
+        }
         let texture_creator = self.canvas.texture_creator();
         let mut font = self
             .ttf_context
@@ -170,7 +172,6 @@ impl Gui {
             .map_err(|e| e.to_string())
             .unwrap();
         let TextureQuery { width, height, .. } = texture.query();
-        let padding = 64;
         let target = self.get_centered_rect(
             width,
             height,
@@ -192,8 +193,13 @@ impl Gui {
         let y = (rect_heigth * point.0 as u32) as i16 + (rect_heigth / 2) as i16;
         let x = (rect_width * point.1 as u32) as i16 + (rect_width / 2) as i16;
         let radius = (std::cmp::min(rect_heigth, rect_width) * 2 / 10) as i16;
-
-        self.canvas.aa_circle(x, y, radius, color::X).unwrap();
+        let offset = (radius as f64 / std::f64::consts::SQRT_2) as i16;
+        self.canvas
+            .line(x - offset, y - offset, x + offset, y + offset, color::X)
+            .unwrap();
+        self.canvas
+            .line(x + offset, y - offset, x - offset, y + offset, color::X)
+            .unwrap();
     }
 
     fn draw_o(&mut self, game_field: &GameField, point: (usize, usize)) {
