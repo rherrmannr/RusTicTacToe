@@ -4,12 +4,6 @@ use std::io;
 
 pub struct Cli {}
 
-impl Cli {
-    pub fn new() -> Cli {
-        Cli {}
-    }
-}
-
 impl UI for Cli {
     fn display(&mut self, game_field: &GameField) {
         Cli::print_gamefield(game_field);
@@ -36,6 +30,10 @@ impl UI for Cli {
 }
 
 impl Cli {
+    pub fn new() -> Cli {
+        Cli {}
+    }
+
     fn print_gamefield(game_field: &GameField) {
         for row in game_field.get_field() {
             for col in row {
