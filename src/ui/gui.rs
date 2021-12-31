@@ -147,7 +147,7 @@ impl Gui {
     }
 
     fn draw_player_has_won(&mut self, player: &Player) {
-        self.draw_text(format!("Player {} has won!", player.sign()).to_owned());
+        self.draw_text(format!("Player {} has won!", player.sign()));
     }
 
     fn draw_text(&mut self, text: String) {

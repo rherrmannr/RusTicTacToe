@@ -29,8 +29,8 @@ impl UI for Cli {
 
     fn process_input(&mut self, game_field: &GameField) -> Event {
         match game_field.get_state() {
-            State::Playing => return Event::Point(Cli::get_point()),
-            State::Draw | State::Winner(_) => return Event::Restart,
+            State::Playing => Event::Point(Cli::get_point()),
+            State::Draw | State::Winner(_) => Event::Restart,
         }
     }
 }
