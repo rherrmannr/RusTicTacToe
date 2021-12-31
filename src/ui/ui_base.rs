@@ -1,4 +1,4 @@
-use crate::tic_toc::game_field::GameField;
+use crate::tic_tac_toe::game_field::GameField;
 
 pub enum Mode {
     Gui,

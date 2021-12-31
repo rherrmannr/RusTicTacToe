@@ -1,5 +1,5 @@
 use super::ui_base::*;
-use crate::tic_toc::game_field::{GameField, State};
+use crate::tic_tac_toe::game_field::{GameField, State};
 use std::io;
 
 pub struct Cli {}

@@ -1,4 +1,4 @@
-mod tic_toc;
+mod tic_tac_toe;
 mod ui {
     pub mod cli;
     pub mod gui;
@@ -14,6 +14,6 @@ fn main() {
             mode = ui::ui_base::Mode::Gui;
         }
     }
-    let mut game = tic_toc::game::Game::new(mode);
+    let mut game = tic_tac_toe::game::Game::new(mode);
     game.run();
 }

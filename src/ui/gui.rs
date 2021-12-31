@@ -1,7 +1,7 @@
 use super::ui_base::*;
 
-use crate::tic_toc::game_field::{GameField, State};
-use crate::tic_toc::player::Player;
+use crate::tic_tac_toe::game_field::{GameField, State};
+use crate::tic_tac_toe::player::Player;
 
 extern crate sdl2;
 use sdl2::gfx::primitives::DrawRenderer;
@@ -107,8 +107,8 @@ impl Gui {
         for (i, signs) in game_field.get_field().iter().enumerate() {
             for (j, &sign) in signs.iter().enumerate() {
                 match sign {
-                    crate::tic_toc::player::Sign::X => self.draw_x(game_field, (i, j)),
-                    crate::tic_toc::player::Sign::O => self.draw_o(game_field, (i, j)),
+                    crate::tic_tac_toe::player::Sign::X => self.draw_x(game_field, (i, j)),
+                    crate::tic_tac_toe::player::Sign::O => self.draw_o(game_field, (i, j)),
                     _ => {}
                 }
             }
