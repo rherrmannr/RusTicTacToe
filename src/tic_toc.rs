@@ -366,7 +366,12 @@ pub mod game_field {
         }
 
         pub fn is_draw(&self) -> bool {
-            self.field.iter().flatten().filter(|&&sign| sign == player::Sign::None).count() == 0
+            self.field
+                .iter()
+                .flatten()
+                .filter(|&&sign| sign == player::Sign::None)
+                .count()
+                == 0
         }
 
         pub fn get_state(&self) -> State {
